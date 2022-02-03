@@ -1,5 +1,6 @@
-import s from './Section.module.css';
-import PropTypes from 'prop-types';
+import React from "react";
+import s from "./Section.module.css";
+import PropTypes from "prop-types";
 export default function Section({ title, children }) {
   return (
     <section className={s.section}>

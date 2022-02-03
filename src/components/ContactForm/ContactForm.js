@@ -1,28 +1,25 @@
-import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
-import s from './ContactForm.module.css';
-import { getContacts } from '../../redux/contacts/selectors';
-import { contactsOperations } from '../../redux/contacts';
+import React from "react";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import s from "./ContactForm.module.css";
+import {
+  useGetContactsQuery,
+  useAddContactMutation,
+} from "../../redux/contacts/contactsSlice";
 
 export default function ContactForm() {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+  const { data = [] } = useGetContactsQuery();
+  const [addContact] = useAddContactMutation();
 
-  const contacts = useSelector(getContacts);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    return dispatch(contactsOperations.fetchContact());
-  }, [dispatch]);
-
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     switch (name) {
-      case 'name':
+      case "name":
         setName(value);
         break;
-      case 'number':
+      case "number":
         setNumber(value);
         break;
       default:
@@ -30,20 +27,20 @@ export default function ContactForm() {
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     formSubmitHandler({ name, number, id: uuidv4() });
-    setName('');
-    setNumber('');
+    setName("");
+    setNumber("");
   };
 
-  const formSubmitHandler = item => {
+  const formSubmitHandler = (item) => {
     const normalizedName = item.name.toLowerCase();
-    contacts.find(el => {
+    data.find((el) => {
       return el.name.toLowerCase() === normalizedName;
     })
       ? alert(`${item.name} is alredy in contacts`)
-      : dispatch(contactsOperations.addContact(item));
+      : addContact(item);
   };
 
   const nameId = uuidv4();
