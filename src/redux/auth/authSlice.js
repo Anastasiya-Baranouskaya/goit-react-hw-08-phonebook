@@ -6,127 +6,81 @@ import {
   logoutThunk,
 } from './authThunks';
 
+const initialState = {
+  user: { name: null, email: null },
+  token: null,
+  isAuth: false,
+  isLoading: false,
+  error: null,
+  isFetchingCurrent: false,
+};
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: { name: '', email: '' },
-    token: '',
-    error: 'null',
-    isLoading: false,
-    isAuth: false,
-    myProp: 'Hello',
-  },
-  reducers: {
-    renameProp: (state, action) => {
-      return { ...state, myProp: action.payload };
-    },
-  },
+  initialState,
   extraReducers: {
     [signupThunk.pending](state) {
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+      state.isLoading = true;
+      state.error = null;
     },
     [signupThunk.fulfilled](state, action) {
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isLoading: false,
-        isAuth: true,
-      };
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isLoading = false;
+      state.isAuth = true;
     },
     [signupThunk.rejected](state, action) {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
+      state.isLoading = false;
+      state.error = action.error.message;
     },
+
     [loginThunk.pending](state) {
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+      state.isLoading = true;
+      state.error = null;
     },
     [loginThunk.fulfilled](state, action) {
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isLoading: false,
-        isAuth: true,
-      };
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isLoading = false;
+      state.isAuth = true;
     },
     [loginThunk.rejected](state, action) {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
+      state.isLoading = false;
+      state.error = action.error.message;
     },
+
     [getCurrentUserThunk.pending](state) {
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+      state.isFetchingCurrent = true;
+      state.isLoading = true;
+      state.error = null;
     },
     [getCurrentUserThunk.fulfilled](state, action) {
-      console.log('action: ', action);
-      if (action.payload.message) {
-        return {
-          ...state,
-          isLoading: false,
-          isAuth: false,
-          error: action.payload,
-        };
-      }
-      return {
-        ...state,
-        user: action.payload,
-        isLoading: false,
-        isAuth: true,
-      };
+      state.user = action.payload;
+      state.isAuth = true;
+      state.isLoading = false;
+      state.isFetchingCurrent = false;
     },
     [getCurrentUserThunk.rejected](state, action) {
-      return {
-        ...state,
-        isLoading: false,
-        isAuth: false,
-        error: action.payload,
-      };
+      state.isFetchingCurrent = false;
+      state.isLoading = false;
+      state.error = action.error.message;
     },
+
     [logoutThunk.pending](state) {
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+      state.isLoading = true;
+      state.error = null;
     },
-    [logoutThunk.fulfilled](action) {
-      console.log('action: ', action);
-      return {
-        user: { name: '', email: '' },
-        token: '',
-        error: 'null',
-        isLoading: false,
-        isAuth: false,
-      };
+    [logoutThunk.fulfilled](state) {
+      state.user = { name: null, email: null };
+      state.token = null;
+      state.isLoading = false;
+      state.isAuth = false;
     },
     [logoutThunk.rejected](state, action) {
-      return {
-        ...state,
-        isLoading: false,
-        isAuth: false,
-        error: action.payload,
-      };
+      state.isLoading = false;
+      state.error = action.error.message;
     },
   },
 });
 
-export const { renameProp } = authSlice.actions;
 export default authSlice.reducer;

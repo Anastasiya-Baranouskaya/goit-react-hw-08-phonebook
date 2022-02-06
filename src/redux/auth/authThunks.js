@@ -1,95 +1,77 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from 'axios';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 
-const BASE_USER_URL = "https://connections-api.herokuapp.com/";
-const userSignup = "users/signup";
-const userLogin = "users/login";
-const userLogout = "users/logout";
-const userCurrent = "users/current";
+axios.defaults.baseURL = 'https://connections-api.herokuapp.com/';
+
+const token = {
+  set(token) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  },
+  unset() {
+    axios.defaults.headers.common.Authorization = '';
+  },
+};
 
 export const signupThunk = createAsyncThunk(
-  "users/signup",
+  'users/signup',
   async (user, { rejectWithValue }) => {
     try {
-      const response = await fetch(BASE_USER_URL + userSignup, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const data = await response.json();
+      const { data } = await axios.post('users/signup', user);
+      token.set(data.token);
+      toast.success('You have successfully registered');
       return data;
-    } catch (err) {
-      return rejectWithValue({ error: err.name });
+    } catch (error) {
+      return rejectWithValue(toast.error(`There is an error: ${error}`));
     }
-  }
+  },
 );
 
 export const loginThunk = createAsyncThunk(
-  "users/login",
+  'users/login',
   async (user, { rejectWithValue }) => {
     try {
-      const response = await fetch(BASE_USER_URL + userLogin, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const data = await response.json();
+      const { data } = await axios.post('users/login', user);
+      token.set(data.token);
+      toast.success('You have successfully logged in');
       return data;
-    } catch (err) {
-      return rejectWithValue({ error: err.name });
+    } catch (error) {
+      return rejectWithValue(toast.error(`There is an error: ${error}`));
     }
-  }
-);
-
-export const getCurrentUserThunk = createAsyncThunk(
-  "users/current",
-  async (_, { rejectWithValue, getState }) => {
-    const state = getState();
-    try {
-      const response = await fetch(BASE_USER_URL + userCurrent, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          // Authorization: `Bearer ${state.auth.token}`,
-          Authorization: `${state.auth.token}`,
-        },
-      });
-      const data = await response.json();
-      console.log("response in currentThunk: ", response);
-      console.log("data in currentThunk: ", data);
-
-      return data;
-    } catch (err) {
-      console.log("err: ", err);
-      return rejectWithValue(err.message);
-    }
-  }
+  },
 );
 
 export const logoutThunk = createAsyncThunk(
-  "users/logout",
-  async (_, { rejectWithValue, getState }) => {
-    const state = getState();
+  'users/logout',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(BASE_USER_URL + userLogout, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          // Authorization: `Bearer ${state.auth.token}`,
-          Authorization: `${state.auth.token}`,
-        },
-      });
-      const data = await response.json();
-      console.log("response in logoutThunk: ", response);
-      console.log("data in logoutThunk: ", data);
-
-      return data;
+      await axios.post('users/logout');
+      token.unset();
     } catch (err) {
-      console.log("err: ", err);
-      return rejectWithValue(err.message);
+      return rejectWithValue(err);
     }
-  }
+  },
+);
+
+export const getCurrentUserThunk = createAsyncThunk(
+  'users/current',
+
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    const persistedToken = state.auth.token;
+
+    if (persistedToken === null) {
+      return rejectWithValue();
+    }
+
+    token.set(persistedToken);
+    try {
+      const { data } = await axios.get('users/current');
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.log('error in GetCurrentUser: ', error);
+      return rejectWithValue(error);
+    }
+  },
 );

@@ -1,84 +1,90 @@
 import './App.css';
-import React from 'react';
-import { Link, Routes, Route } from 'react-router-dom';
-import Section from './components/Section/Section';
-import ContactList from './components/ContactList/ContactList';
-import ContactForm from './components/ContactForm/ContactForm';
-import Filter from './components/Filter/Filter';
-import HomePage from './pages/HomePages';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import { PrivateRoute } from './routes/PrivateRoute';
-import { PublicRoute } from './routes/PublicRoute';
-import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
-import { getCurrentUserThunk, logoutThunk } from './redux/auth/authThunks';
-import { contactsSelectors } from './redux/contacts';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { Routes, Route } from 'react-router-dom';
+import { PrivateRoute } from 'routes/PrivateRoute';
+import { PublicRoute } from 'routes/PublicRoute';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, Suspense, lazy } from 'react';
+import { getCurrentUserThunk } from 'redux/auth/authThunks';
+import AppBar from 'components/AppBar/AppBar';
+import Container from 'components/Container/Container';
+import { authSelectors } from 'redux/auth';
+import LoaderSpin from 'components/Loader/Loader';
 
-const isAuth = false;
+const HomePage = lazy(() => import('Pages/HomePage/HomePage'));
+const ContactsPage = lazy(() =>
+  import(
+    'Pages/ContactsPage/ContactsPage' /* webpackChunkName: "contacts-page" */
+  ),
+);
+const LoginPage = lazy(() =>
+  import('Pages/LoginPage/LoginPage' /* webpackChunkName: "login-page" */),
+);
+const RegisterPage = lazy(() =>
+  import(
+    'Pages/RegisterPage/RegisterPage' /* webpackChunkName: "register-page" */
+  ),
+);
+const NotFoundPage = lazy(() =>
+  import(
+    'Pages/NotFoundPage/NotFoundPage' /* webpackChunkName: "not-found-page" */
+  ),
+);
 
 export default function App() {
-  const auth = useSelector(contactsSelectors.getAuth);
-
   const dispatch = useDispatch();
+  const isFetchingCurrent = useSelector(authSelectors.getIsFetchingCurrent);
+
   useEffect(() => {
     dispatch(getCurrentUserThunk());
   }, [dispatch]);
 
-  const handleLogout = () => {
-    dispatch(logoutThunk());
-  };
-
   return (
-    <div className="App">
-      <header>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">HomePage</Link>
-            </li>
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-            <li>
-              <Link to="/register">Register</Link>
-            </li>
-            <li>
-              <button type="button" onClick={handleLogout}>
-                Log out
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <main>
-        {!auth && (
-          <Routes>
-            <Route
-              path="/"
-              element={<PrivateRoute isAuth={isAuth} component={HomePage} />}
-            />
-            <Route
-              path="/logit"
-              element={<PublicRoute isAuth={isAuth} component={Login} />}
-            />
-            <Route
-              path="/register"
-              element={<PublicRoute isAuth={isAuth} component={Register} />}
-            />
-          </Routes>
-        )}
-        {auth && (
-          <>
-            <Section title="Phonebook">
-              <ContactForm />
-              <h1>Contacts</h1>
-              <Filter />
-              <ContactList />
-            </Section>
-          </>
-        )}
-      </main>
-    </div>
+    <Container>
+      {isFetchingCurrent ? (
+        <LoaderSpin />
+      ) : (
+        <>
+          <AppBar />
+          <ToastContainer theme="colored" autoClose={2000} />
+          <Suspense fallback={<LoaderSpin />}>
+            <Routes>
+              <Route
+                path="/"
+                exact="true"
+                element={<PublicRoute component={HomePage} />}
+              />
+
+              <Route
+                path="/contacts"
+                exact="true"
+                element={<PrivateRoute component={ContactsPage} />}
+              />
+
+              <Route
+                path="/login"
+                exact="true"
+                element={
+                  <PublicRoute
+                    restricted
+                    redirectedTo="/contacts"
+                    component={LoginPage}
+                  />
+                }
+              />
+
+              <Route
+                path="/register"
+                exact="true"
+                element={<PublicRoute restricted component={RegisterPage} />}
+              />
+
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </>
+      )}
+    </Container>
   );
 }
