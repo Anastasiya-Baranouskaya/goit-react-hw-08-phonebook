@@ -32,7 +32,7 @@ export default function ContactsList() {
       {isFetching && <LoaderSpin />}
 
       <ul>
-        {!isFetching &&
+        {filteredContacts?.length > 0 &&
           filteredContacts.map(({ id, name, number }) => (
             <ContactsListItem key={id} id={id} name={name} number={number} />
           ))}

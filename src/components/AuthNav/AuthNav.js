@@ -2,10 +2,9 @@ import styles from 'components/AuthNav/AuthNav.module.css';
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-const setActive = ({ isActive }) =>
-  isActive ? styles.activeLink : styles.link;
-
 export default function AuthNav() {
+  const setActive = ({ isActive }) =>
+    isActive ? styles.activeLink : styles.link;
   return (
     <div className={styles.container}>
       <NavLink to="/register" exact="true" className={setActive}>

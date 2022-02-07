@@ -42,49 +42,46 @@ export default function App() {
 
   return (
     <Container>
-      {isFetchingCurrent ? (
-        <LoaderSpin />
-      ) : (
-        <>
-          <AppBar />
-          <ToastContainer theme="colored" autoClose={2000} />
-          <Suspense fallback={<LoaderSpin />}>
-            <Routes>
-              <Route
-                path="/"
-                exact="true"
-                element={<PublicRoute component={HomePage} />}
-              />
+      {isFetchingCurrent && <LoaderSpin />}
+      <>
+        <AppBar />
+        <ToastContainer theme="colored" autoClose={2000} />
+        <Suspense fallback={<LoaderSpin />}>
+          <Routes>
+            <Route
+              path="/"
+              exact="true"
+              element={<PublicRoute component={HomePage} />}
+            />
 
-              <Route
-                path="/contacts"
-                exact="true"
-                element={<PrivateRoute component={ContactsPage} />}
-              />
+            <Route
+              path="/contacts"
+              exact="true"
+              element={<PrivateRoute component={ContactsPage} />}
+            />
 
-              <Route
-                path="/login"
-                exact="true"
-                element={
-                  <PublicRoute
-                    restricted
-                    redirectedTo="/contacts"
-                    component={LoginPage}
-                  />
-                }
-              />
+            <Route
+              path="/login"
+              exact="true"
+              element={
+                <PublicRoute
+                  restricted
+                  redirectedTo="/contacts"
+                  component={LoginPage}
+                />
+              }
+            />
 
-              <Route
-                path="/register"
-                exact="true"
-                element={<PublicRoute restricted component={RegisterPage} />}
-              />
+            <Route
+              path="/register"
+              exact="true"
+              element={<PublicRoute restricted component={RegisterPage} />}
+            />
 
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </>
-      )}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </>
     </Container>
   );
 }

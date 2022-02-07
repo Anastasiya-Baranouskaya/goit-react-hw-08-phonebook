@@ -5,8 +5,6 @@ import PropTypes from 'prop-types';
 export default function ContactsList({ id, name, number }) {
   const [deleteContact] = useDeleteContactMutation();
 
-  const onDelete = id => deleteContact(id);
-
   return (
     <li className={styles.item}>
       <span className={styles.name}>{name}:</span>
@@ -15,9 +13,7 @@ export default function ContactsList({ id, name, number }) {
         type="button"
         className={styles.button}
         id={id}
-        onClick={() => {
-          onDelete(id);
-        }}
+        onClick={() => deleteContact(id)}
       >
         Delete
       </button>

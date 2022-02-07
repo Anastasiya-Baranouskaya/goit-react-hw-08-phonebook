@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { signupThunk } from 'redux/auth/authThunks';
-// import { toast } from 'react-toastify';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -39,7 +38,6 @@ export default function Register() {
     setName('');
     setEmail('');
     setPassword('');
-    // toast.success('You have registered!');
   };
 
   const nameId = uuidv4();

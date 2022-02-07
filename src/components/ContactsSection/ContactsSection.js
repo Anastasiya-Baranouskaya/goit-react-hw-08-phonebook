@@ -11,5 +11,5 @@ export default function ContactsSection({ title, children }) {
 }
 ContactsSection.propTypes = {
   title: PropTypes.string.isRequired,
-  children: PropTypes.array.isRequired,
+  children: PropTypes.any,
 };
